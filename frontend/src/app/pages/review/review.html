@@ -1,0 +1,47 @@
+<main class="review-page">
+  @if (task(); as draft) {
+    <header class="review-header">
+      <a class="back-link" routerLink="/create">Back to Create</a>
+      <p class="eyebrow">AI-generated draft</p>
+      <h1>{{ draft.title }}</h1>
+      <p>{{ draft.description }}</p>
+
+      <div class="summary">
+        <span>Total commitment: {{ draft.commitmentAmount | currency: 'EUR' }}</span>
+        <span>Assigned total: {{ assignedTotal() | currency: 'EUR' }}</span>
+        <span>{{ draft.steps.length }} steps</span>
+      </div>
+    </header>
+
+    <section class="steps" aria-label="Generated commitment steps">
+      @for (step of draft.steps; track step.id) {
+        <article class="step-card">
+          <div class="step-number">Step {{ step.order }}</div>
+          <h2>{{ step.title }}</h2>
+          <p>{{ step.description }}</p>
+
+          <dl>
+            <div>
+              <dt>Expected output</dt>
+              <dd>{{ step.expectedOutput }}</dd>
+            </div>
+            <div>
+              <dt>Time limit</dt>
+              <dd>{{ step.timeLimitMinutes }} min</dd>
+            </div>
+            <div>
+              <dt>Assigned credit</dt>
+              <dd>{{ step.assignedCredit | currency: 'EUR' }}</dd>
+            </div>
+          </dl>
+        </article>
+      }
+    </section>
+  } @else {
+    <section class="empty-state">
+      <h1>No draft commitment yet</h1>
+      <p>Create a task first, then the mock LLM plan will appear here.</p>
+      <a routerLink="/create">Create Commitment</a>
+    </section>
+  }
+</main>

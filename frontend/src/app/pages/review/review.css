@@ -1,0 +1,147 @@
+.review-page {
+  min-height: 100vh;
+  padding: 42px 20px 72px;
+  background: #f6f7fb;
+  color: #1f2430;
+}
+
+.review-header,
+.steps,
+.empty-state {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.review-header {
+  margin-bottom: 28px;
+}
+
+.back-link,
+.empty-state a {
+  display: inline-flex;
+  color: #5e75e2;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.back-link {
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-header h1,
+.empty-state h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.15;
+}
+
+.review-header p:not(.eyebrow),
+.empty-state p {
+  max-width: 720px;
+  margin: 14px 0 0;
+  color: #5f6675;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.summary span {
+  padding: 9px 12px;
+  border: 1px solid #e0e5f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #394154;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.steps {
+  display: grid;
+  gap: 18px;
+}
+
+.step-card {
+  padding: 24px;
+  border: 1px solid #e1e5ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(35, 43, 71, 0.06);
+}
+
+.step-number {
+  color: #6680e5;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.step-card h2 {
+  margin: 8px 0 10px;
+  font-size: 22px;
+}
+
+.step-card p {
+  margin: 0;
+  color: #5f6675;
+  line-height: 1.6;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0 0;
+}
+
+dt {
+  margin-bottom: 6px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+  color: #252b3a;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.empty-state {
+  display: grid;
+  place-items: start;
+  gap: 18px;
+  padding-top: 80px;
+}
+
+@media (max-width: 720px) {
+  .review-page {
+    padding: 28px 16px 56px;
+  }
+
+  .review-header h1,
+  .empty-state h1 {
+    font-size: 32px;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+  }
+}
