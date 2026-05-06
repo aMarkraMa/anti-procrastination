@@ -356,11 +356,11 @@ Webhooks are signed; the route lives at `POST /api/v1/payments/webhooks/{provide
 
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
+source .venv/bin/activate
 cp env.example .env
 alembic upgrade head
-uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload
 ```
 
 OpenAPI is auto-generated at `http://localhost:8000/docs`.
