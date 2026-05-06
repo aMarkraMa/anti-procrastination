@@ -1,0 +1,130 @@
+<app-topbar [showSignedIn]="true" [accountLabel]="accountLabel()"></app-topbar>
+
+<app-confetti [trigger]="confettiTrigger()" [intensity]="rewardIsFinal() ? 'big' : 'small'"></app-confetti>
+<app-step-reward
+  [trigger]="rewardTrigger()"
+  [amount]="rewardAmount()"
+  [isFinal]="rewardIsFinal()"
+></app-step-reward>
+
+<main class="execute-page">
+  @if (task(); as t) {
+    <div class="container exec-inner">
+      <header class="exec-header">
+        <p class="eyebrow">In progress</p>
+        <h1>{{ t.title }}</h1>
+        <p class="subtitle muted">{{ t.description }}</p>
+      </header>
+
+      <section class="meters" aria-label="Credit overview">
+        <div class="meter">
+          <span class="meter-label">Locked</span>
+          <strong class="mono">€{{ formatEuro(t.commitmentAmount) }}</strong>
+        </div>
+        <div class="meter ok" [class.is-pulsing]="earnedPulse()">
+          <span class="meter-label">Earned</span>
+          <strong class="mono">€{{ formatEuro(earnedCredit()) }}</strong>
+        </div>
+        <div class="meter risk">
+          <span class="meter-label">At risk</span>
+          <strong class="mono">€{{ formatEuro(atRiskCredit()) }}</strong>
+        </div>
+        <div class="meter">
+          <span class="meter-label">Step</span>
+          <strong class="mono">{{ activeIndex() + 1 }} / {{ t.steps.length }}</strong>
+        </div>
+      </section>
+
+      <progress class="progress" [value]="completedCount()" [max]="t.steps.length"></progress>
+
+      @if (activeStep(); as step) {
+        <section class="active-card card" [class.is-overdue]="overdue()">
+          <header>
+            <span class="step-badge mono">Step {{ step.order }}</span>
+            <span class="step-credit mono">€{{ formatEuro(step.assignedCredit) }} on the line</span>
+          </header>
+
+          <h2>{{ step.title }}</h2>
+          <p class="step-desc">{{ step.description }}</p>
+
+          <div class="expected">
+            <p class="eyebrow">How you'll know it's done</p>
+            <p>{{ step.expectedOutput }}</p>
+          </div>
+
+          <div class="timer-block">
+            <div class="timer-display" [class.danger]="lowTime()" [class.dead]="overdue()">
+              <span class="mono big">{{ countdown() }}</span>
+              <small class="muted">remaining · ends {{ deadlineLabel() }}</small>
+            </div>
+            <div class="timer-meta">
+              <span class="muted">Base time</span>
+              <strong class="mono">{{ step.timeLimitMinutes }} min</strong>
+              <span class="muted">Extensions</span>
+              <strong class="mono">{{ step.extensionsUsed }} / {{ step.maxExtensions }}</strong>
+              <span class="muted">Each adds</span>
+              <strong class="mono">+{{ extensionMinutes(step) }} min</strong>
+            </div>
+          </div>
+
+          @if (overdue()) {
+            <div class="banner banner-danger">
+              The deadline for this step passed. Forfeiting the rest of the contract.
+            </div>
+          }
+
+          <div class="exec-actions">
+            <button class="btn btn-danger" type="button" (click)="giveUp()" [disabled]="finalizing()">
+              Give up task
+            </button>
+            <button
+              class="btn"
+              type="button"
+              (click)="extend()"
+              [disabled]="!canExtend() || finalizing()"
+              title="Each extension adds 30% of the original time"
+            >
+              + Extend ({{ step.maxExtensions - step.extensionsUsed }} left)
+            </button>
+            <button
+              class="btn btn-primary btn-lg"
+              type="button"
+              (click)="completeStep()"
+              [disabled]="overdue() || finalizing()"
+            >
+              Complete step
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </section>
+      }
+
+      <section class="step-list" aria-label="All steps">
+        <p class="section-title">All steps</p>
+        <ol>
+          @for (s of t.steps; track s.id; let i = $index) {
+            <li class="step-row" [attr.data-status]="s.status">
+              <span class="status-dot" [attr.data-status]="s.status"></span>
+              <span class="num mono">{{ i + 1 }}</span>
+              <div class="meta">
+                <p class="title">{{ s.title }}</p>
+                <small class="muted">
+                  {{ s.timeLimitMinutes }} min · €{{ formatEuro(s.assignedCredit) }}
+                  @if (s.status === 'Completed') { · ✓ Done }
+                  @if (s.status === 'Failed') { · ✕ Failed }
+                  @if (s.status === 'Active') { · in progress }
+                </small>
+              </div>
+            </li>
+          }
+        </ol>
+      </section>
+    </div>
+  } @else {
+    <div class="container empty-state">
+      <h1>No active commitment</h1>
+      <p>You don't have a contract running right now.</p>
+      <a class="btn btn-primary" routerLink="/create">Create commitment</a>
+    </div>
+  }
+</main>

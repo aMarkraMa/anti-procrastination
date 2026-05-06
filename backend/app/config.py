@@ -1,6 +1,5 @@
 from functools import lru_cache
 
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,25 +15,20 @@ class Settings(BaseSettings):
     app_port: int = 8000
     app_cors_origins: str = "http://localhost:4200,http://localhost:5173"
 
-    jwt_secret: str = "change-me"
-    jwt_access_ttl_minutes: int = 30
-    jwt_refresh_ttl_days: int = 14
-
-    database_url: str = "sqlite+aiosqlite:///./app.db"
-
-    llm_provider: str = "openai"
     openai_api_key: str | None = None
     llm_model: str = "gpt-4o-mini"
     llm_max_steps: int = 8
     llm_temperature: float = 0.4
     llm_request_timeout_seconds: int = 60
 
-    payment_provider: str = "mock"
-    stripe_secret_key: str | None = None
-    stripe_webhook_secret: str | None = None
-    forfeit_destination: str = "burn"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.0-flash"
 
-    scheduler_tick_seconds: int = Field(default=10, ge=1)
+    llm_provider_order: str = "openai,gemini"
+
+    @property
+    def provider_chain(self) -> list[str]:
+        return [p.strip() for p in self.llm_provider_order.split(",") if p.strip()]
 
     @property
     def cors_origins(self) -> list[str]:

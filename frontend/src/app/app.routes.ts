@@ -14,6 +14,23 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/review/review').then((m) => m.ReviewComponent),
   },
   {
+    path: 'confirm',
+    loadComponent: () => import('./pages/confirm/confirm').then((m) => m.ConfirmComponent),
+  },
+  {
+    path: 'bank',
+    loadComponent: () => import('./pages/bank/bank').then((m) => m.BankComponent),
+  },
+  {
+    path: 'execute',
+    loadComponent: () =>
+      import('./pages/execute/execute').then((m) => m.ExecuteComponent),
+  },
+  {
+    path: 'result',
+    loadComponent: () => import('./pages/result/result').then((m) => m.ResultComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

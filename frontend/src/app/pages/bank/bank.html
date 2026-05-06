@@ -1,0 +1,185 @@
+<app-topbar></app-topbar>
+
+<main class="bank-page">
+  @if (task(); as draft) {
+    <div class="container bank-inner">
+      <a class="back-link focus-ring" [routerLink]="['/confirm']" [queryParams]="{ taskId: draft.id }">← Back</a>
+      <p class="eyebrow">Step 4 of 4 · Lock the contract</p>
+      <h1>Charge €{{ formatEuro(draft.commitmentAmount) }} to your account.</h1>
+      <p class="subtitle muted">
+        This is a demo bank — no real money moves. The charge call goes to the
+        local backend which always returns success.
+      </p>
+
+      <div class="grid">
+        <form class="card pay-card" [formGroup]="form" (ngSubmit)="charge()">
+          <div class="card-visual" aria-hidden="true">
+            <span class="card-brand">Deadline Bank</span>
+            <span class="card-number mono">•••• •••• •••• {{ last4Display() }}</span>
+            <div class="card-row">
+              <span>{{ form.controls.cardHolder.value || 'CARD HOLDER' }}</span>
+              <span class="mono">{{ form.controls.expiry.value || 'MM/YY' }}</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="holder">Card holder</label>
+            <input
+              id="holder"
+              class="input"
+              type="text"
+              formControlName="cardHolder"
+              autocomplete="cc-name"
+              placeholder="Jane Demo"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="number">Card number</label>
+            <input
+              id="number"
+              class="input mono"
+              type="text"
+              formControlName="cardNumber"
+              inputmode="numeric"
+              autocomplete="cc-number"
+              maxlength="19"
+              placeholder="4242 4242 4242 4242"
+              (input)="onCardInput($event)"
+            />
+            @if (formError('cardNumber')) {
+              <span class="field-error">Enter a 13–19 digit card number.</span>
+            }
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label" for="expiry">Expiry</label>
+              <input
+                id="expiry"
+                class="input mono"
+                type="text"
+                formControlName="expiry"
+                inputmode="numeric"
+                placeholder="12/29"
+                maxlength="5"
+                (input)="onExpiryInput($event)"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="cvv">CVV</label>
+              <input
+                id="cvv"
+                class="input mono"
+                type="text"
+                formControlName="cvv"
+                inputmode="numeric"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+          </div>
+
+          <div class="field discount">
+            <label class="field-label" for="discount">Discount code</label>
+            <div class="discount-row">
+              <input
+                id="discount"
+                class="input mono"
+                type="text"
+                formControlName="discountCode"
+                placeholder="e.g. FREE100"
+                autocomplete="off"
+                (keydown.enter)="$event.preventDefault(); applyDiscount()"
+              />
+              @if (appliedDiscount()) {
+                <button class="btn btn-sm" type="button" (click)="clearDiscount()">Remove</button>
+              } @else {
+                <button class="btn btn-sm" type="button" (click)="applyDiscount()">Apply</button>
+              }
+            </div>
+            @if (appliedDiscount(); as d) {
+              <small class="discount-hint ok">
+                ✓ <span class="mono">{{ d.code }}</span> applied — {{ d.percent }}% off
+              </small>
+            } @else if (discountError()) {
+              <small class="discount-hint bad">{{ discountError() }}</small>
+            } @else {
+              <small class="discount-hint muted">
+                Try <span class="kbd">FREE100</span> to test the flow without charging.
+              </small>
+            }
+          </div>
+
+          @if (error()) {
+            <div class="banner banner-danger">{{ error() }}</div>
+          }
+
+          <button type="submit" class="btn btn-primary btn-lg pay-button" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Charging €{{ formatEuro(chargeAmount()) }}…
+            } @else {
+              Charge €{{ formatEuro(chargeAmount()) }}
+            }
+          </button>
+
+          <small class="muted disclaimer">
+            Demo only · no card data is stored or sent off-machine.
+          </small>
+        </form>
+
+        <aside class="card receipt-card">
+          <p class="section-title">Receipt preview</p>
+          <h3>{{ draft.title }}</h3>
+          <dl>
+            <div>
+              <dt>Account</dt>
+              <dd class="mono">DB-{{ accountSuffix() }}</dd>
+            </div>
+            <div>
+              <dt>Subtotal</dt>
+              <dd class="mono">€{{ formatEuro(draft.commitmentAmount) }}</dd>
+            </div>
+            @if (appliedDiscount(); as d) {
+              <div class="discount-line">
+                <dt>
+                  Discount
+                  <span class="badge-tag mono">{{ d.code }}</span>
+                </dt>
+                <dd class="mono">−€{{ formatEuro(discountAmount()) }}</dd>
+              </div>
+            }
+            <div class="total-line">
+              <dt>Total today</dt>
+              <dd class="mono">€{{ formatEuro(chargeAmount()) }}</dd>
+            </div>
+            <div>
+              <dt>At risk</dt>
+              <dd class="mono">€{{ formatEuro(draft.commitmentAmount) }}</dd>
+            </div>
+            <div>
+              <dt>Steps locked</dt>
+              <dd class="mono">{{ draft.steps.length }}</dd>
+            </div>
+            <div>
+              <dt>Total time</dt>
+              <dd class="mono">{{ totalMinutes() }} min</dd>
+            </div>
+          </dl>
+          <p class="muted small">
+            Once charged, the timer for Step 1 starts immediately on the next page.
+            @if (appliedDiscount()) {
+              The full €{{ formatEuro(draft.commitmentAmount) }} is still on the line — only today's payment is reduced.
+            }
+          </p>
+        </aside>
+      </div>
+    </div>
+  } @else {
+    <div class="container empty-state">
+      <h1>Nothing to charge</h1>
+      <a class="btn btn-primary" routerLink="/create">Create commitment</a>
+    </div>
+  }
+</main>

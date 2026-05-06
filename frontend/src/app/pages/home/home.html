@@ -1,42 +1,92 @@
-<header class="topbar">
-  <img class="brand-logo" src="/assets/dblogo-long.png" alt="Deadline Bank" />
-</header>
+<app-topbar></app-topbar>
 
 <main class="hero">
-  <section class="hero-content" aria-labelledby="home-title">
-    <h2 id="home-title">Turn your vague goals into real commitments.</h2>
+  <div class="container hero-inner">
+    <span class="badge">
+      <span class="dot"></span>
+      Hackathon demo · v0.1
+    </span>
 
-    <div class="intro">
-      <p>拖延往往不是因为你不想做，而是因为任务太模糊、没有压力、没有即时后果。</p>
-      <p>这个工具会把你的大目标拆成可执行步骤，并让你为每一步设置真实承诺。</p>
+    <h1>Turn vague goals into <em>real</em> commitments.</h1>
+
+    <p class="lede">
+      Deadline Bank wraps any task in an LLM-generated, credit-backed commitment
+      contract. Miss a step, lose your money. Ship the step, get it back.
+    </p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary btn-lg" routerLink="/create">
+        Start a commitment
+        <span aria-hidden="true">→</span>
+      </a>
+      <a class="btn btn-lg" href="#how">How it works</a>
     </div>
 
-    <div class="features" aria-label="核心功能">
-      <article class="feature-card">
-        <span class="feature-icon" aria-hidden="true">🎯</span>
-        <h3>任务拆解</h3>
-        <p>AI 自动拆解模糊目标为具体步骤</p>
-      </article>
-
-      <article class="feature-card">
-        <span class="feature-icon" aria-hidden="true">💰</span>
-        <h3>真实承诺</h3>
-        <p>设置承诺金额，增加行动压力</p>
-      </article>
-
-      <article class="feature-card">
-        <span class="feature-icon" aria-hidden="true">⏱️</span>
-        <h3>限时执行</h3>
-        <p>每一步都有时间限制，加强紧迫感</p>
-      </article>
-
-      <article class="feature-card">
-        <span class="feature-icon" aria-hidden="true">✅</span>
-        <h3>可验证完成</h3>
-        <p>清晰的完成标准，避免模糊判断</p>
-      </article>
-    </div>
-
-    <a class="cta" routerLink="/create">Start a Commitment</a>
-  </section>
+    <ul class="trust">
+      <li><span class="mono">€1–€10K</span> commitment range</li>
+      <li><span class="mono">3–8</span> verifiable steps</li>
+      <li><span class="mono">3×30%</span> extensions per step</li>
+    </ul>
+  </div>
 </main>
+
+<section class="how" id="how" aria-labelledby="how-title">
+  <div class="container">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-title">Sign a contract with your future self.</h2>
+
+    <ol class="how-grid">
+      <li class="how-card">
+        <span class="step-num mono">01</span>
+        <h3>Describe the task</h3>
+        <p>
+          Title, description, total time, total commitment. Anything vague gets
+          flagged before you even hit submit.
+        </p>
+      </li>
+      <li class="how-card">
+        <span class="step-num mono">02</span>
+        <h3>AI splits it up</h3>
+        <p>
+          GPT breaks it into 3–8 sequential, verifiable steps with a per-step
+          time budget and credit slice.
+        </p>
+      </li>
+      <li class="how-card">
+        <span class="step-num mono">03</span>
+        <h3>Edit, regenerate, balance</h3>
+        <p>
+          Tweak any step, ask the model to retry it, or auto-balance amounts
+          to match your total — exactly to the cent.
+        </p>
+      </li>
+      <li class="how-card">
+        <span class="step-num mono">04</span>
+        <h3>Charge & execute</h3>
+        <p>
+          Lock the commitment with a (mock) bank charge. Each step has a hard
+          timer with up to 3 × 30% extensions.
+        </p>
+      </li>
+    </ol>
+
+    <div class="rules card">
+      <div>
+        <p class="eyebrow">Rules of the contract</p>
+        <h3>If a step times out, all remaining credit is forfeit.</h3>
+      </div>
+      <ul class="rules-list">
+        <li><strong>Completed</strong> steps keep their credit.</li>
+        <li><strong>Failed</strong> step + all later steps are forfeited.</li>
+        <li>You can extend a live step up to 3 times — each adds 30% of the original budget.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span class="muted">© Deadline Bank</span>
+    <span class="muted mono">commit · execute · settle</span>
+  </div>
+</footer>

@@ -1,147 +1,276 @@
 .review-page {
   min-height: 100vh;
-  padding: 42px 20px 72px;
-  background: #f6f7fb;
-  color: #1f2430;
+  background: var(--bg);
+  padding: 56px 0 96px;
 }
 
-.review-header,
-.steps,
-.empty-state {
-  width: min(100%, 960px);
-  margin: 0 auto;
+.review-inner {
+  display: grid;
+  gap: 24px;
 }
 
-.review-header {
-  margin-bottom: 28px;
-}
-
-.back-link,
-.empty-state a {
-  display: inline-flex;
-  color: #5e75e2;
-  font-weight: 800;
-  text-decoration: none;
+.page-header {
+  max-width: 860px;
 }
 
 .back-link {
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-
-.eyebrow {
-  margin: 0 0 8px;
-  color: #6b7280;
+  display: inline-flex;
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 18px;
 }
 
-.review-header h1,
-.empty-state h1 {
-  margin: 0;
-  font-size: 40px;
+.back-link:hover {
+  color: var(--fg);
+}
+
+.page-header h1 {
+  margin: 6px 0 12px;
+  font-size: clamp(28px, 4vw, 36px);
+  letter-spacing: -0.02em;
   line-height: 1.15;
+  font-weight: 700;
 }
 
-.review-header p:not(.eyebrow),
-.empty-state p {
-  max-width: 720px;
-  margin: 14px 0 0;
-  color: #5f6675;
-  font-size: 17px;
-  line-height: 1.65;
+.subtitle {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 .summary {
-  display: flex;
-  flex-wrap: wrap;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 22px;
 }
 
-.summary span {
-  padding: 9px 12px;
-  border: 1px solid #e0e5f0;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #394154;
-  font-size: 14px;
-  font-weight: 800;
+.summary-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: var(--fg-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.summary-card strong {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.summary-card strong.is-bad {
+  color: var(--danger);
+}
+
+.summary-card small {
+  font-size: 12px;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .steps {
   display: grid;
-  gap: 18px;
+  gap: 14px;
 }
 
 .step-card {
-  padding: 24px;
-  border: 1px solid #e1e5ef;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 14px 34px rgba(35, 43, 71, 0.06);
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  transition: border-color 120ms ease;
+}
+
+.step-card:hover {
+  border-color: var(--border-strong);
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.step-head > div:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .step-number {
-  color: #6680e5;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: 12px;
+  color: var(--fg-subtle);
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.step-credit,
+.step-time {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-muted);
+  font-size: 12px;
+  color: var(--fg);
+}
+
+.step-credit {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.step-credit.is-zero {
+  background: var(--danger-soft);
+  border-color: #fbcaca;
+  color: #7a0000;
+}
+
+.step-actions {
+  display: inline-flex;
+  gap: 6px;
 }
 
 .step-card h2 {
-  margin: 8px 0 10px;
-  font-size: 22px;
+  margin: 4px 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.step-card p {
+.step-desc {
   margin: 0;
-  color: #5f6675;
-  line-height: 1.6;
+  color: var(--fg-muted);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
-dl {
+.step-meta {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.step-meta div {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 16px;
-  margin: 20px 0 0;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  align-items: baseline;
 }
 
-dt {
-  margin-bottom: 6px;
-  color: #6b7280;
+.step-meta dt {
   font-size: 12px;
-  font-weight: 900;
+  color: var(--fg-subtle);
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
 }
 
-dd {
+.step-meta dd {
   margin: 0;
-  color: #252b3a;
-  font-weight: 800;
-  line-height: 1.45;
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.step-edit {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.review-footer {
+  position: sticky;
+  bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  box-shadow: var(--shadow);
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: spin 800ms linear infinite;
+  margin-right: 6px;
+  vertical-align: -1px;
 }
 
 .empty-state {
+  padding: 80px 0;
   display: grid;
-  place-items: start;
-  gap: 18px;
-  padding-top: 80px;
+  gap: 16px;
+  justify-items: start;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 720px) {
-  .review-page {
-    padding: 28px 16px 56px;
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .review-header h1,
-  .empty-state h1 {
-    font-size: 32px;
-  }
-
-  dl {
+  .grid {
     grid-template-columns: 1fr;
+  }
+  .step-meta div {
+    grid-template-columns: 1fr;
+  }
+  .step-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

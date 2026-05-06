@@ -5,13 +5,19 @@ import { Router, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { GeneratedStep, PlanApiService } from '../../api/plan-api';
-import { CommitmentStep, CommitmentTaskInput, DurationUnit } from '../../models/commitment';
+import {
+  CommitmentStep,
+  CommitmentTaskInput,
+  DEFAULT_MAX_EXTENSIONS,
+  DurationUnit,
+} from '../../models/commitment';
 import { CommitmentStorageService } from '../../services/commitment-storage';
+import { TopbarComponent } from '../../components/topbar';
 
 @Component({
   selector: 'app-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule],
+  imports: [ReactiveFormsModule, RouterModule, TopbarComponent],
   templateUrl: './create.html',
   styleUrls: ['./create.css'],
 })
@@ -30,7 +36,7 @@ export class CreateComponent {
     description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(800)]],
     durationValue: [30, [Validators.required, Validators.min(1)]],
     durationUnit: ['minutes' as DurationUnit, [Validators.required]],
-    commitmentAmount: [30, [Validators.required, Validators.min(1), Validators.max(10000)]],
+    commitmentAmount: [30, [Validators.required, Validators.min(0.01), Validators.max(10000)]],
     difficultyLevel: ['Medium' as CommitmentTaskInput['difficultyLevel'], [Validators.required]],
     preferredStepCount: [4, [Validators.required, Validators.min(3), Validators.max(8)]],
     workStyle: ['Steady' as CommitmentTaskInput['workStyle'], [Validators.required]],
@@ -56,7 +62,8 @@ export class CreateComponent {
       '变厉害',
     ];
 
-    const hasSpecificSignal = /\d|今天|今晚|明天|小时|分钟|完成|提交|写完|修改|build|finish|submit/.test(text);
+    const hasSpecificSignal =
+      /\d|今天|今晚|明天|小时|分钟|完成|提交|写完|修改|build|finish|submit|ship|send/.test(text);
 
     return vaguePatterns.some((pattern) => text.includes(pattern)) && !hasSpecificSignal;
   }
@@ -65,7 +72,7 @@ export class CreateComponent {
     const value = this.form.controls.durationValue.value;
 
     if (!Number.isFinite(value) || value < 1) {
-      return '请输入大于 0 的持续时间。';
+      return 'Pick a duration of at least 1.';
     }
 
     return '';
@@ -125,7 +132,7 @@ export class CreateComponent {
 
   private toCommitmentStep(step: GeneratedStep, taskId: string): CommitmentStep {
     return {
-      id: this.generateStepId(),
+      id: this.storage.generateId(),
       taskId,
       order: step.order,
       title: step.title,
@@ -135,32 +142,25 @@ export class CreateComponent {
       assignedCredit: step.assignedCredit,
       status: 'Pending',
       extensionsUsed: 0,
-      maxExtensions: 3,
+      maxExtensions: DEFAULT_MAX_EXTENSIONS,
     };
-  }
-
-  private generateStepId(): string {
-    if (typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function') {
-      return window.crypto.randomUUID();
-    }
-    return `step-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   private formatError(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
       const detail = (err.error?.detail ?? err.error) as { code?: string; message?: string } | string | undefined;
       if (detail && typeof detail === 'object' && detail.code === 'llm_unavailable') {
-        return 'AI 拆解服务暂不可用，请检查后端 OPENAI_API_KEY 是否配置。';
+        return 'AI plan service is unavailable. Check OPENAI_API_KEY in backend/.env.local.';
       }
       if (err.status === 0) {
-        return '无法连接到后端 (http://localhost:8000)，请确认 FastAPI 已启动。';
+        return 'Cannot reach backend at http://localhost:8000. Is uvicorn running?';
       }
       if (err.status === 422) {
-        return '请求字段未通过校验，请检查表单内容。';
+        return 'Validation failed. Double-check the form fields.';
       }
-      return `请求失败 (HTTP ${err.status})，请稍后重试。`;
+      return `Request failed (HTTP ${err.status}). Try again.`;
     }
-    return '生成承诺计划时发生未知错误，请重试。';
+    return 'Unexpected error generating the plan. Please retry.';
   }
 
   private calculateDeadline(value: number, unit: DurationUnit): string {

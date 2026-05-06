@@ -1,0 +1,103 @@
+<app-topbar></app-topbar>
+
+@if (isSuccess()) {
+  <app-confetti [trigger]="confettiTrigger()" intensity="big"></app-confetti>
+}
+
+<main class="result-page" [class.is-success]="isSuccess()" [class.is-fail]="!isSuccess()">
+  @if (task(); as t) {
+    <div class="container result-inner">
+      <header class="result-header">
+        <span class="status-pill mono">{{ statusLabel() }}</span>
+        <h1>
+          @if (isSuccess()) {
+            Commitment completed.
+          } @else if (t.status === 'Abandoned') {
+            Commitment abandoned.
+          } @else {
+            Commitment failed.
+          }
+        </h1>
+        <p class="subtitle muted">
+          @if (isSuccess()) {
+            You shipped every step on time. Full credit recovered.
+          } @else if (failedStepLabel()) {
+            You missed the deadline for {{ failedStepLabel() }}.
+          } @else {
+            You stopped the contract before completing it.
+          }
+        </p>
+      </header>
+
+      <section class="totals">
+        <div class="total-card neutral">
+          <span class="muted">Total commitment</span>
+          <strong class="mono">€{{ formatEuro(t.commitmentAmount) }}</strong>
+        </div>
+        <div class="total-card good">
+          <span class="muted">Earned credit</span>
+          <strong class="mono">€{{ formatEuro(animatedEarned()) }}</strong>
+        </div>
+        <div class="total-card bad">
+          <span class="muted">Lost credit</span>
+          <strong class="mono">€{{ formatEuro(lostCredit()) }}</strong>
+        </div>
+        <div class="total-card neutral">
+          <span class="muted">Time used</span>
+          <strong class="mono">{{ timeUsed() }}</strong>
+        </div>
+      </section>
+
+      <section class="card breakdown">
+        <p class="section-title">Step breakdown</p>
+        <ol>
+          @for (s of t.steps; track s.id; let i = $index) {
+            <li class="row" [attr.data-status]="s.status">
+              <span class="status-dot" [attr.data-status]="s.status"></span>
+              <span class="num mono">{{ i + 1 }}</span>
+              <div class="meta">
+                <p class="title">{{ s.title }}</p>
+                <small class="muted">
+                  {{ s.timeLimitMinutes }} min · €{{ formatEuro(s.assignedCredit) }} ·
+                  @switch (s.status) {
+                    @case ('Completed') { ✓ Completed }
+                    @case ('Failed') { ✕ Failed }
+                    @case ('Active') { interrupted }
+                    @default { Not started }
+                  }
+                  @if (s.extensionsUsed > 0) {
+                    · {{ s.extensionsUsed }} extension(s)
+                  }
+                </small>
+              </div>
+              <strong class="mono outcome" [class.good]="s.status === 'Completed'" [class.bad]="s.status !== 'Completed'">
+                @if (s.status === 'Completed') {
+                  +€{{ formatEuro(s.assignedCredit) }}
+                } @else {
+                  -€{{ formatEuro(s.assignedCredit) }}
+                }
+              </strong>
+            </li>
+          }
+        </ol>
+      </section>
+
+      @if (extensionsUsedTotal() > 0) {
+        <p class="muted small">
+          Total extensions used across the contract: <strong class="mono">{{ extensionsUsedTotal() }}</strong>.
+          Hardest step: <strong>{{ hardestStep() }}</strong>.
+        </p>
+      }
+
+      <div class="actions">
+        <a class="btn" routerLink="/">Back to home</a>
+        <a class="btn btn-primary" routerLink="/create">Start a new commitment</a>
+      </div>
+    </div>
+  } @else {
+    <div class="container empty-state">
+      <h1>Nothing to show</h1>
+      <a class="btn btn-primary" routerLink="/create">Start a new commitment</a>
+    </div>
+  }
+</main>

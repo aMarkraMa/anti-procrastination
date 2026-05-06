@@ -31,10 +31,25 @@ export class CommitmentStorageService {
     return this.readAll().find((t) => t.id === id);
   }
 
+  getLatest(): CommitmentTask | undefined {
+    const tasks = this.readAll();
+    return tasks.length ? tasks[tasks.length - 1] : undefined;
+  }
+
   getLatestDraft(): CommitmentTask | undefined {
     const tasks = this.readAll();
     for (let i = tasks.length - 1; i >= 0; i--) {
       if (tasks[i].status === 'Draft') {
+        return tasks[i];
+      }
+    }
+    return undefined;
+  }
+
+  getActiveTask(): CommitmentTask | undefined {
+    const tasks = this.readAll();
+    for (let i = tasks.length - 1; i >= 0; i--) {
+      if (tasks[i].status === 'Active' || tasks[i].status === 'Confirmed') {
         return tasks[i];
       }
     }
@@ -55,6 +70,13 @@ export class CommitmentStorageService {
   remove(id: string): void {
     const tasks = this.readAll().filter((t) => t.id !== id);
     this.writeAll(tasks);
+  }
+
+  generateId(): string {
+    if (this.isBrowser && typeof window.crypto?.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   private readAll(): CommitmentTask[] {
@@ -82,12 +104,5 @@ export class CommitmentStorageService {
     } catch {
       // Storage full or blocked - fail silently in dev.
     }
-  }
-
-  private generateId(): string {
-    if (this.isBrowser && typeof window.crypto?.randomUUID === 'function') {
-      return window.crypto.randomUUID();
-    }
-    return `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

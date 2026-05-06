@@ -1,0 +1,83 @@
+<app-topbar></app-topbar>
+
+<main class="confirm-page">
+  @if (task(); as draft) {
+    <div class="container confirm-inner">
+      <a class="back-link focus-ring" [routerLink]="['/review']" [queryParams]="{ taskId: draft.id }">← Back to plan</a>
+      <p class="eyebrow">Step 3 of 4 · Confirm contract</p>
+      <h1>You're about to lock <span class="mono">€{{ formatEuro(draft.commitmentAmount) }}</span> behind your future self.</h1>
+
+      <div class="grid">
+        <section class="card primary-card">
+          <p class="section-title">The contract</p>
+          <h2>{{ draft.title }}</h2>
+          <p class="muted">{{ draft.description }}</p>
+
+          <ul class="rules">
+            <li>
+              <span class="rule-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>Ship every step on time</strong>
+                <small>Recover the full €{{ formatEuro(draft.commitmentAmount) }} once the last step is done.</small>
+              </div>
+            </li>
+            <li>
+              <span class="rule-icon warn" aria-hidden="true">!</span>
+              <div>
+                <strong>Miss a deadline</strong>
+                <small>That step plus every later step is forfeited. Already-completed steps keep their credit.</small>
+              </div>
+            </li>
+            <li>
+              <span class="rule-icon" aria-hidden="true">⏱</span>
+              <div>
+                <strong>Need a buffer?</strong>
+                <small>Each step can be extended up to 3 times — each adds 30% of its original budget.</small>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <aside class="card preview-card">
+          <p class="section-title">Step preview</p>
+          <ol class="preview-steps">
+            @for (s of draft.steps; track s.id; let i = $index) {
+              <li>
+                <span class="mono num">{{ i + 1 }}</span>
+                <div>
+                  <p class="title">{{ s.title }}</p>
+                  <small class="muted">{{ s.timeLimitMinutes }} min · €{{ formatEuro(s.assignedCredit) }}</small>
+                </div>
+              </li>
+            }
+          </ol>
+
+          <div class="totals">
+            <div>
+              <span class="muted">Total</span>
+              <strong class="mono">€{{ formatEuro(draft.commitmentAmount) }}</strong>
+            </div>
+            <div>
+              <span class="muted">Total time</span>
+              <strong class="mono">{{ totalMinutes() }} min</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="actions">
+        <a class="btn" [routerLink]="['/review']" [queryParams]="{ taskId: draft.id }">Back to edit</a>
+        <button class="btn btn-primary btn-lg" type="button" (click)="proceed()">
+          I understand — continue to bank
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="container empty-state">
+      <h1>No commitment to confirm</h1>
+      <p>Your plan didn't survive the round-trip. Start a new commitment.</p>
+      <a class="btn btn-primary" routerLink="/create">Create commitment</a>
+    </div>
+  }
+</main>

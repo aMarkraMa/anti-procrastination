@@ -1,172 +1,215 @@
-.topbar {
-  height: 64px;
-  display: grid;
-  place-items: center;
-  background: #ffffff;
-  color: #202124;
-  border-bottom: 1px solid #d7d7e8;
-}
-
-.brand-logo {
+:host {
   display: block;
-  width: min(280px, 76vw);
-  height: auto;
-  max-height: 46px;
-  object-fit: contain;
+  background: var(--bg);
 }
 
 .hero {
-  min-height: calc(100vh - 64px);
-  display: grid;
-  place-items: center;
-  padding: 72px 24px 120px;
+  position: relative;
+  padding: 120px 0 96px;
+  background:
+    radial-gradient(1100px 520px at 50% -10%, rgba(0, 112, 243, 0.07), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: #ffffff;
-  background: linear-gradient(112deg, #6680e5 0%, #7350ac 100%);
-}
-
-.hero-content {
-  width: min(100%, 900px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero-content h2 {
-  max-width: 720px;
-  margin: 0;
-  font-size: 44px;
-  font-weight: 800;
-  line-height: 1.35;
-  text-wrap: balance;
-}
-
-.intro {
-  margin-top: 30px;
-  display: grid;
   gap: 24px;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.65;
 }
 
-.intro p {
-  margin: 0;
-}
-
-.features {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 28px;
-  margin-top: 48px;
-}
-
-.feature-card {
-  min-height: 178px;
-  display: flex;
-  flex-direction: column;
+.badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 24px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.11);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.feature-icon {
-  display: block;
-  min-height: 44px;
-  font-size: 36px;
-  line-height: 1;
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.18);
 }
 
-.feature-card h3 {
-  margin: 14px 0 10px;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.25;
-}
-
-.feature-card p {
-  max-width: 140px;
+.hero h1 {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 14px;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   font-weight: 700;
+  max-width: 920px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.lede {
+  margin: 0;
+  max-width: 640px;
+  color: var(--fg-muted);
+  font-size: 18px;
   line-height: 1.55;
 }
 
-.cta {
-  min-width: 245px;
-  margin-top: 74px;
-  padding: 15px 28px;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #6b83e9;
-  box-shadow: 0 14px 28px rgba(38, 30, 84, 0.2);
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1;
-  text-decoration: none;
+.cta-row {
+  margin-top: 8px;
+  display: inline-flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.cta:focus-visible {
-  outline: 3px solid rgba(255, 255, 255, 0.65);
-  outline-offset: 4px;
+.trust {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  color: var(--fg-subtle);
+  font-size: 13px;
+}
+
+.trust li::before {
+  content: "•";
+  margin-right: 8px;
+  color: var(--border-strong);
+}
+
+.trust li:first-child::before {
+  display: none;
+}
+
+.how {
+  padding: 96px 0 24px;
+}
+
+.how h2 {
+  margin: 8px 0 40px;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  max-width: 640px;
+}
+
+.how-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.how-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.how-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.step-num {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--fg-subtle);
+  margin-bottom: 14px;
+}
+
+.how-card h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.how-card p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.rules {
+  margin-top: 64px;
+  margin-bottom: 96px;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.rules h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.rules-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
+.rules-list li::before {
+  content: "→ ";
+  color: var(--fg-subtle);
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 24px 0;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {
-  .hero {
-    align-items: start;
-    padding-top: 68px;
-  }
-
-  .features {
+  .how-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 560px;
+  }
+  .rules {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 560px) {
-  .topbar {
-    height: 58px;
-  }
-
-  .brand-logo {
-    width: min(230px, 78vw);
-    max-height: 40px;
-  }
-
   .hero {
-    min-height: calc(100vh - 58px);
-    padding: 48px 18px 72px;
+    padding: 80px 0 64px;
   }
-
-  .hero-content h2 {
-    font-size: 32px;
-  }
-
-  .intro {
-    margin-top: 24px;
-    gap: 18px;
-    font-size: 16px;
-  }
-
-  .features {
+  .how-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-top: 36px;
-  }
-
-  .feature-card {
-    min-height: 150px;
-  }
-
-  .cta {
-    width: min(100%, 280px);
-    margin-top: 44px;
   }
 }

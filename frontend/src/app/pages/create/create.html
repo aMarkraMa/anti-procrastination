@@ -1,127 +1,178 @@
+<app-topbar></app-topbar>
+
 <main class="create-page">
-  <header class="page-header">
-    <a class="back-link" routerLink="/">Back</a>
-    <p class="eyebrow">Commitment setup</p>
-    <h1>Create a concrete task</h1>
-    <p>
-      Give the system enough detail to generate small, verifiable steps with a real time box and
-      credit risk.
-    </p>
-  </header>
+  <div class="container create-inner">
+    <header class="page-header">
+      <a class="back-link focus-ring" routerLink="/">← Back</a>
+      <p class="eyebrow">Step 1 of 4 · Define</p>
+      <h1>Describe a concrete task.</h1>
+      <p class="subtitle">
+        The more specific you are, the better the model can break it down. Vague
+        goals get rejected here so you don't waste credit later.
+      </p>
+    </header>
 
-  <form class="task-form" [formGroup]="form" (ngSubmit)="submit()">
-    <label class="field">
-      <span>Task Title</span>
-      <input type="text" formControlName="title" placeholder="完成 React 项目首页" />
-      @if (fieldInvalid('title')) {
-        <small>请输入 4 到 80 个字符的任务标题。</small>
+    <form class="task-form card" [formGroup]="form" (ngSubmit)="submit()">
+      <section class="form-block">
+        <div class="block-head">
+          <p class="section-title">Task</p>
+          <span class="muted mono">required</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="title">Title</label>
+          <input
+            id="title"
+            class="input"
+            type="text"
+            formControlName="title"
+            placeholder="e.g. Finish resume V2 and send to mentor"
+            autocomplete="off"
+          />
+          @if (fieldInvalid('title')) {
+            <span class="field-error">Use a 4–80 character title.</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="description">Description</label>
+          <textarea
+            id="description"
+            class="textarea"
+            formControlName="description"
+            rows="5"
+            placeholder="What needs to be done, the artefact you'll produce, and how you'll know it's done."
+          ></textarea>
+          @if (fieldInvalid('description')) {
+            <span class="field-error">At least 20 characters — be specific enough to verify completion.</span>
+          }
+        </div>
+
+        @if (isAbstractTask) {
+          <div class="banner banner-warning" role="alert">
+            That sounds abstract. Reframe as a verifiable outcome — e.g.
+            <em>"Tonight, finish editing page 1 of my resume"</em> or
+            <em>"Solve 3 LeetCode mediums in 2 hours"</em>.
+          </div>
+        }
+      </section>
+
+      <hr class="hairline" />
+
+      <section class="form-block">
+        <div class="block-head">
+          <p class="section-title">Constraints</p>
+          <span class="muted mono">budget</span>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label class="field-label">Total duration</label>
+            <div class="duration-input">
+              <input class="input" type="number" min="1" step="1" formControlName="durationValue" />
+              <select class="select" formControlName="durationUnit" aria-label="Duration unit">
+                <option value="seconds">seconds</option>
+                <option value="minutes">minutes</option>
+                <option value="hours">hours</option>
+                <option value="days">days</option>
+              </select>
+            </div>
+            @if (durationError) {
+              <span class="field-error">{{ durationError }}</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="amount">Commitment amount</label>
+            <div class="money-input">
+              <span class="prefix">€</span>
+              <input
+                id="amount"
+                class="input"
+                type="number"
+                min="0.01"
+                step="0.01"
+                inputmode="decimal"
+                formControlName="commitmentAmount"
+              />
+            </div>
+            @if (fieldInvalid('commitmentAmount')) {
+              <span class="field-error">Pick an amount between €0.01 and €10,000 (decimals allowed).</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="difficulty">Difficulty</label>
+            <select id="difficulty" class="select" formControlName="difficultyLevel">
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="steps">Preferred step count</label>
+            <input id="steps" class="input" type="number" min="3" max="8" step="1" formControlName="preferredStepCount" />
+            @if (fieldInvalid('preferredStepCount')) {
+              <span class="field-error">Between 3 and 8 steps.</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <hr class="hairline" />
+
+      <section class="form-block">
+        <div class="block-head">
+          <p class="section-title">Work style</p>
+          <span class="muted mono">tone</span>
+        </div>
+
+        <fieldset class="style-options">
+          <legend class="sr-only">Work style</legend>
+
+          <label class="style-card" [class.is-selected]="form.controls.workStyle.value === 'Fast'">
+            <input type="radio" value="Fast" formControlName="workStyle" />
+            <span>
+              <strong>Fast</strong>
+              <small>Shorter steps, fewer checks.</small>
+            </span>
+          </label>
+
+          <label class="style-card" [class.is-selected]="form.controls.workStyle.value === 'Steady'">
+            <input type="radio" value="Steady" formControlName="workStyle" />
+            <span>
+              <strong>Steady</strong>
+              <small>Balanced rhythm, default.</small>
+            </span>
+          </label>
+
+          <label class="style-card" [class.is-selected]="form.controls.workStyle.value === 'HighQuality'">
+            <input type="radio" value="HighQuality" formControlName="workStyle" />
+            <span>
+              <strong>High Quality</strong>
+              <small>Adds review/verification steps.</small>
+            </span>
+          </label>
+        </fieldset>
+      </section>
+
+      @if (error()) {
+        <div class="banner banner-danger" role="alert">{{ error() }}</div>
       }
-    </label>
 
-    <label class="field">
-      <span>Task Description</span>
-      <textarea
-        formControlName="description"
-        rows="5"
-        placeholder="描述你要完成什么、交付物是什么、怎样判断完成。"
-      ></textarea>
-      @if (fieldInvalid('description')) {
-        <small>请至少写 20 个字符，任务需要具体到可以判断完成。</small>
-      }
-    </label>
-
-    @if (isAbstractTask) {
-      <div class="warning" role="alert">
-        这个任务太抽象了。请改成一个可以在某个时间点判断是否完成的任务，例如“今晚完成简历第一页修改”或“在 2 小时内完成 3 道 LeetCode 题”。
+      <div class="actions">
+        <a class="btn" routerLink="/">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Generating commitment plan…
+          } @else {
+            Generate plan
+            <span aria-hidden="true">→</span>
+          }
+        </button>
       </div>
-    }
-
-    <div class="grid">
-      <label class="field">
-        <span>Duration</span>
-        <div class="duration-input">
-          <input type="number" min="1" step="1" formControlName="durationValue" />
-          <select formControlName="durationUnit" aria-label="Duration unit">
-            <option value="seconds">Seconds</option>
-            <option value="minutes">Minutes</option>
-            <option value="hours">Hours</option>
-            <option value="days">Days</option>
-          </select>
-        </div>
-        @if ((fieldInvalid('durationValue') || submitted) && durationError) {
-          <small>{{ durationError }}</small>
-        }
-      </label>
-
-      <label class="field">
-        <span>Commitment Amount</span>
-        <div class="money-input">
-          <input type="number" min="1" step="1" formControlName="commitmentAmount" />
-          <span>€</span>
-        </div>
-        @if (fieldInvalid('commitmentAmount')) {
-          <small>请输入大于 0 的承诺金额。</small>
-        }
-      </label>
-
-      <label class="field">
-        <span>Difficulty Level</span>
-        <select formControlName="difficultyLevel">
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Preferred Step Count</span>
-        <input type="number" min="3" max="8" step="1" formControlName="preferredStepCount" />
-        @if (fieldInvalid('preferredStepCount')) {
-          <small>步骤数量需要在 3 到 8 步之间。</small>
-        }
-      </label>
-    </div>
-
-    <fieldset class="style-options">
-      <legend>Work Style</legend>
-
-      <label>
-        <input type="radio" value="Fast" formControlName="workStyle" />
-        <span>
-          <strong>Fast</strong>
-          快速完成，步骤更短
-        </span>
-      </label>
-
-      <label>
-        <input type="radio" value="Steady" formControlName="workStyle" />
-        <span>
-          <strong>Steady</strong>
-          稳定推进，节奏均衡
-        </span>
-      </label>
-
-      <label>
-        <input type="radio" value="HighQuality" formControlName="workStyle" />
-        <span>
-          <strong>High Quality</strong>
-          更重视检查和质量
-        </span>
-      </label>
-    </fieldset>
-
-    @if (error()) {
-      <div class="warning" role="alert">{{ error() }}</div>
-    }
-
-    <div class="actions">
-      <button type="submit" [disabled]="loading()">
-        @if (loading()) {
-          Generating commitment plan...
-        } @else {
-          Generate Commitment Plan
-        }
-      </button>
-    </div>
-  </form>
+    </form>
+  </div>
 </main>

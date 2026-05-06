@@ -1,0 +1,230 @@
+.bank-page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 56px 0 96px;
+}
+
+.bank-inner {
+  display: grid;
+  gap: 24px;
+}
+
+.back-link {
+  display: inline-flex;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+h1 {
+  margin: 12px 0 6px;
+  font-size: clamp(28px, 4vw, 38px);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 15px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.pay-card {
+  padding: 28px;
+  display: grid;
+  gap: 14px;
+}
+
+.card-visual {
+  position: relative;
+  margin-bottom: 6px;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(900px 220px at 0% 0%, rgba(255, 255, 255, 0.16), transparent 60%),
+    linear-gradient(135deg, #18181b 0%, #2a2a31 100%);
+  color: #ffffff;
+  min-height: 170px;
+  display: grid;
+  align-content: space-between;
+}
+
+.card-brand {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card-number {
+  font-size: 22px;
+  letter-spacing: 0.16em;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.78);
+  text-transform: uppercase;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.discount {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.discount-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.discount-row .input {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.discount-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.discount-hint.ok {
+  color: #059669;
+}
+
+.discount-hint.bad {
+  color: var(--danger);
+}
+
+.pay-button {
+  margin-top: 6px;
+}
+
+.disclaimer {
+  font-size: 12px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.receipt-card {
+  position: sticky;
+  top: 80px;
+  padding: 24px;
+}
+
+.receipt-card h3 {
+  margin: 8px 0 14px;
+  font-size: 17px;
+}
+
+.receipt-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.receipt-card dl div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.receipt-card dt {
+  margin: 0;
+  color: var(--fg-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.receipt-card dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.receipt-card .discount-line dd {
+  color: #059669;
+}
+
+.receipt-card .total-line {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.receipt-card .total-line dt,
+.receipt-card .total-line dd {
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.empty-state {
+  padding: 80px 0;
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .receipt-card {
+    position: static;
+  }
+}

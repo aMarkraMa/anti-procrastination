@@ -1,48 +1,165 @@
+<app-topbar></app-topbar>
+
 <main class="review-page">
   @if (task(); as draft) {
-    <header class="review-header">
-      <a class="back-link" routerLink="/create">Back to Create</a>
-      <p class="eyebrow">AI-generated draft</p>
-      <h1>{{ draft.title }}</h1>
-      <p>{{ draft.description }}</p>
+    <div class="container review-inner">
+      <header class="page-header">
+        <a class="back-link focus-ring" routerLink="/create">← Back to edit</a>
+        <p class="eyebrow">Step 2 of 4 · Review plan</p>
+        <h1>{{ draft.title }}</h1>
+        <p class="subtitle">{{ draft.description }}</p>
 
-      <div class="summary">
-        <span>Total commitment: {{ draft.commitmentAmount | currency: 'EUR' }}</span>
-        <span>Assigned total: {{ assignedTotal() | currency: 'EUR' }}</span>
-        <span>Duration: {{ draft.durationValue }} {{ draft.durationUnit }}</span>
-        <span>{{ draft.steps.length }} steps</span>
-      </div>
-    </header>
+        <div class="summary">
+          <div class="summary-card">
+            <span class="summary-label">Total commitment</span>
+            <strong class="mono">€{{ formatEuro(draft.commitmentAmount) }}</strong>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">Assigned</span>
+            <strong class="mono" [class.is-bad]="!isBalanced()">€{{ formatEuro(assignedTotal()) }}</strong>
+            @if (!isBalanced()) {
+              <small class="muted">need to match €{{ formatEuro(draft.commitmentAmount) }}</small>
+            }
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">Total time</span>
+            <strong class="mono">{{ totalMinutes() }} min</strong>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">Steps</span>
+            <strong class="mono">{{ draft.steps.length }}</strong>
+          </div>
+        </div>
+      </header>
 
-    <section class="steps" aria-label="Generated commitment steps">
-      @for (step of draft.steps; track step.id) {
-        <article class="step-card">
-          <div class="step-number">Step {{ step.order }}</div>
-          <h2>{{ step.title }}</h2>
-          <p>{{ step.description }}</p>
-
-          <dl>
-            <div>
-              <dt>Expected output</dt>
-              <dd>{{ step.expectedOutput }}</dd>
-            </div>
-            <div>
-              <dt>Time limit</dt>
-              <dd>{{ step.timeLimitMinutes }} min</dd>
-            </div>
-            <div>
-              <dt>Assigned credit</dt>
-              <dd>{{ step.assignedCredit | currency: 'EUR' }}</dd>
-            </div>
-          </dl>
-        </article>
+      @if (hasZeroStep()) {
+        <div class="banner banner-warning">
+          Every step must be worth more than €0. Auto-balance will redistribute fairly.
+          <button class="btn btn-sm" type="button" (click)="autoBalance()">Auto-balance</button>
+        </div>
+      } @else if (!isBalanced()) {
+        <div class="banner banner-warning">
+          Step credits sum to €{{ formatEuro(assignedTotal()) }} but total commitment is
+          €{{ formatEuro(draft.commitmentAmount) }}.
+          <button class="btn btn-sm" type="button" (click)="autoBalance()">Auto-balance</button>
+        </div>
       }
-    </section>
+
+      @if (error()) {
+        <div class="banner banner-danger" role="alert">{{ error() }}</div>
+      }
+
+      <section class="steps" aria-label="Generated commitment steps">
+        @for (step of draft.steps; track step.id; let i = $index) {
+          <article class="step-card">
+            <header class="step-head">
+              <div>
+                <span class="step-number mono">Step {{ i + 1 }}</span>
+                <span
+                  class="step-credit mono"
+                  [class.is-zero]="step.assignedCredit <= 0"
+                >€{{ formatEuro(step.assignedCredit) }}</span>
+                <span class="step-time mono">{{ step.timeLimitMinutes }} min</span>
+              </div>
+              <div class="step-actions">
+                @if (editingId() !== step.id) {
+                  <button
+                    class="btn btn-sm btn-ghost"
+                    type="button"
+                    (click)="startEdit(step.id)"
+                    [disabled]="busyId() !== null"
+                  >Edit</button>
+                  <button
+                    class="btn btn-sm btn-ghost"
+                    type="button"
+                    (click)="regenerate(step.id)"
+                    [disabled]="busyId() !== null"
+                  >
+                    @if (busyId() === step.id) {
+                      <span class="spinner-sm" aria-hidden="true"></span> Regenerating…
+                    } @else {
+                      Regenerate
+                    }
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger"
+                    type="button"
+                    (click)="deleteStep(step.id)"
+                    [disabled]="busyId() !== null || draft.steps.length <= 3"
+                    title="At least 3 steps required"
+                  >Delete</button>
+                }
+              </div>
+            </header>
+
+            @if (editingId() === step.id) {
+              <div class="step-edit">
+                <div class="field">
+                  <label class="field-label">Title</label>
+                  <input class="input" type="text" [(ngModel)]="editDraft.title" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Description</label>
+                  <textarea class="textarea" rows="3" [(ngModel)]="editDraft.description"></textarea>
+                </div>
+                <div class="field">
+                  <label class="field-label">Expected output</label>
+                  <input class="input" type="text" [(ngModel)]="editDraft.expectedOutput" />
+                </div>
+                <div class="grid">
+                  <div class="field">
+                    <label class="field-label">Time limit (minutes)</label>
+                    <input class="input" type="number" min="1" [(ngModel)]="editDraft.timeLimitMinutes" />
+                  </div>
+                  <div class="field">
+                    <label class="field-label">Assigned credit (€)</label>
+                    <input
+                      class="input"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      inputmode="decimal"
+                      [(ngModel)]="editDraft.assignedCredit"
+                    />
+                  </div>
+                </div>
+                <div class="edit-actions">
+                  <button class="btn btn-sm" type="button" (click)="cancelEdit()">Cancel</button>
+                  <button class="btn btn-sm btn-primary" type="button" (click)="saveEdit(step.id)">Save</button>
+                </div>
+              </div>
+            } @else {
+              <h2>{{ step.title }}</h2>
+              <p class="step-desc">{{ step.description }}</p>
+              <dl class="step-meta">
+                <div>
+                  <dt>Expected output</dt>
+                  <dd>{{ step.expectedOutput }}</dd>
+                </div>
+              </dl>
+            }
+          </article>
+        }
+      </section>
+
+      <footer class="review-footer">
+        <a class="btn" routerLink="/create">Start over</a>
+        <button
+          class="btn btn-primary btn-lg"
+          type="button"
+          (click)="continueToConfirm()"
+          [disabled]="!isBalanced() || hasZeroStep() || busyId() !== null"
+        >
+          Looks good — continue
+          <span aria-hidden="true">→</span>
+        </button>
+      </footer>
+    </div>
   } @else {
-    <section class="empty-state">
-      <h1>No draft commitment yet</h1>
-      <p>Create a task first, then the mock LLM plan will appear here.</p>
-      <a routerLink="/create">Create Commitment</a>
-    </section>
+    <div class="container empty-state">
+      <h1>No draft yet</h1>
+      <p>Create a task first and the AI plan will appear here.</p>
+      <a class="btn btn-primary" routerLink="/create">Create commitment</a>
+    </div>
   }
 </main>
