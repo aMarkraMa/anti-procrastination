@@ -1,8 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
-import { CommitmentTaskInput, DurationUnit } from '../../models/commitment';
+import { GeneratedStep, PlanApiService } from '../../api/plan-api';
+import { CommitmentStep, CommitmentTaskInput, DurationUnit } from '../../models/commitment';
 import { CommitmentStorageService } from '../../services/commitment-storage';
 
 @Component({
@@ -16,8 +19,11 @@ export class CreateComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
   private readonly storage = inject(CommitmentStorageService);
+  private readonly planApi = inject(PlanApiService);
 
   protected submitted = false;
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
 
   protected readonly form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(80)]],
@@ -78,13 +84,83 @@ export class CreateComponent {
       return;
     }
 
-    const formValue = this.form.getRawValue();
-    const task = this.storage.createDraft({
-      ...formValue,
-      finalDeadline: this.calculateDeadline(formValue.durationValue, formValue.durationUnit),
-    });
+    if (this.loading()) {
+      return;
+    }
 
-    await this.router.navigate(['/review'], { queryParams: { taskId: task.id } });
+    this.error.set(null);
+    this.loading.set(true);
+
+    const formValue = this.form.getRawValue();
+
+    try {
+      const plan = await firstValueFrom(
+        this.planApi.generatePlan({
+          title: formValue.title,
+          description: formValue.description,
+          durationValue: formValue.durationValue,
+          durationUnit: formValue.durationUnit,
+          commitmentAmount: formValue.commitmentAmount,
+          difficultyLevel: formValue.difficultyLevel,
+          preferredStepCount: formValue.preferredStepCount,
+          workStyle: formValue.workStyle,
+        }),
+      );
+
+      const task = this.storage.createDraft({
+        ...formValue,
+        finalDeadline: this.calculateDeadline(formValue.durationValue, formValue.durationUnit),
+      });
+
+      const steps: CommitmentStep[] = plan.steps.map((step) => this.toCommitmentStep(step, task.id));
+      this.storage.update(task.id, { steps });
+
+      await this.router.navigate(['/review'], { queryParams: { taskId: task.id } });
+    } catch (err) {
+      this.error.set(this.formatError(err));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private toCommitmentStep(step: GeneratedStep, taskId: string): CommitmentStep {
+    return {
+      id: this.generateStepId(),
+      taskId,
+      order: step.order,
+      title: step.title,
+      description: step.description,
+      expectedOutput: step.expectedOutput,
+      timeLimitMinutes: step.timeLimitMinutes,
+      assignedCredit: step.assignedCredit,
+      status: 'Pending',
+      extensionsUsed: 0,
+      maxExtensions: 3,
+    };
+  }
+
+  private generateStepId(): string {
+    if (typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return `step-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  private formatError(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const detail = (err.error?.detail ?? err.error) as { code?: string; message?: string } | string | undefined;
+      if (detail && typeof detail === 'object' && detail.code === 'llm_unavailable') {
+        return 'AI 拆解服务暂不可用，请检查后端 OPENAI_API_KEY 是否配置。';
+      }
+      if (err.status === 0) {
+        return '无法连接到后端 (http://localhost:8000)，请确认 FastAPI 已启动。';
+      }
+      if (err.status === 422) {
+        return '请求字段未通过校验，请检查表单内容。';
+      }
+      return `请求失败 (HTTP ${err.status})，请稍后重试。`;
+    }
+    return '生成承诺计划时发生未知错误，请重试。';
   }
 
   private calculateDeadline(value: number, unit: DurationUnit): string {

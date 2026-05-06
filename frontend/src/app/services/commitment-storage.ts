@@ -1,137 +1,93 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
-import { CommitmentStep, CommitmentTask, CommitmentTaskInput } from '../models/commitment';
+import {
+  CommitmentTask,
+  CommitmentTaskInput,
+} from '../models/commitment';
 
-const STORAGE_KEY = 'commitment_tasks';
+const STORAGE_KEY = 'antiproc.commitments.v1';
 
 @Injectable({ providedIn: 'root' })
 export class CommitmentStorageService {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
   createDraft(input: CommitmentTaskInput): CommitmentTask {
-    const taskId = crypto.randomUUID();
     const task: CommitmentTask = {
       ...input,
-      id: taskId,
+      id: this.generateId(),
       status: 'Draft',
-      steps: this.generateMockSteps(taskId, input),
+      steps: [],
       createdAt: new Date().toISOString(),
     };
 
-    const tasks = this.getAll();
-    this.saveAll([task, ...tasks]);
-
+    const tasks = this.readAll();
+    tasks.push(task);
+    this.writeAll(tasks);
     return task;
   }
 
-  getAll(): CommitmentTask[] {
-    const rawTasks = localStorage.getItem(STORAGE_KEY);
+  getById(id: string): CommitmentTask | undefined {
+    return this.readAll().find((t) => t.id === id);
+  }
 
-    if (!rawTasks) {
+  getLatestDraft(): CommitmentTask | undefined {
+    const tasks = this.readAll();
+    for (let i = tasks.length - 1; i >= 0; i--) {
+      if (tasks[i].status === 'Draft') {
+        return tasks[i];
+      }
+    }
+    return undefined;
+  }
+
+  update(id: string, patch: Partial<CommitmentTask>): CommitmentTask | undefined {
+    const tasks = this.readAll();
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) {
+      return undefined;
+    }
+    tasks[index] = { ...tasks[index], ...patch, id: tasks[index].id };
+    this.writeAll(tasks);
+    return tasks[index];
+  }
+
+  remove(id: string): void {
+    const tasks = this.readAll().filter((t) => t.id !== id);
+    this.writeAll(tasks);
+  }
+
+  private readAll(): CommitmentTask[] {
+    if (!this.isBrowser) {
       return [];
     }
-
     try {
-      return JSON.parse(rawTasks) as CommitmentTask[];
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return [];
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as CommitmentTask[]) : [];
     } catch {
       return [];
     }
   }
 
-  getLatestDraft(): CommitmentTask | undefined {
-    return this.getAll().find((task) => task.status === 'Draft');
-  }
-
-  getById(taskId: string): CommitmentTask | undefined {
-    return this.getAll().find((task) => task.id === taskId);
-  }
-
-  private saveAll(tasks: CommitmentTask[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }
-
-  private generateMockSteps(taskId: string, input: CommitmentTaskInput): CommitmentStep[] {
-    const stepCount = input.preferredStepCount;
-    const credits = this.splitCredit(input.commitmentAmount, stepCount);
-    const baseMinutes = this.getBaseMinutes(input.difficultyLevel, input.workStyle);
-
-    return Array.from({ length: stepCount }, (_, index) => {
-      const order = index + 1;
-
-      return {
-        id: crypto.randomUUID(),
-        taskId,
-        order,
-        title: this.getStepTitle(order, stepCount, input.title),
-        description: this.getStepDescription(order, stepCount, input),
-        expectedOutput: this.getExpectedOutput(order, stepCount, input.title),
-        timeLimitMinutes: baseMinutes + index * 5,
-        assignedCredit: credits[index],
-        status: 'Pending',
-        extensionsUsed: 0,
-        maxExtensions: 3,
-      };
-    });
-  }
-
-  private splitCredit(total: number, count: number): number[] {
-    const cents = Math.round(total * 100);
-    const base = Math.floor(cents / count);
-    const remainder = cents - base * count;
-
-    return Array.from({ length: count }, (_, index) => {
-      const value = base + (index < remainder ? 1 : 0);
-      return value / 100;
-    });
-  }
-
-  private getBaseMinutes(difficulty: CommitmentTaskInput['difficultyLevel'], style: CommitmentTaskInput['workStyle']): number {
-    const difficultyMinutes = {
-      Easy: 25,
-      Medium: 40,
-      Hard: 55,
-    }[difficulty];
-
-    const styleAdjustment = {
-      Fast: -5,
-      Steady: 0,
-      HighQuality: 10,
-    }[style];
-
-    return difficultyMinutes + styleAdjustment;
-  }
-
-  private getStepTitle(order: number, stepCount: number, title: string): string {
-    if (order === 1) {
-      return `Clarify scope for ${title}`;
+  private writeAll(tasks: CommitmentTask[]): void {
+    if (!this.isBrowser) {
+      return;
     }
-
-    if (order === stepCount) {
-      return `Finalize and verify ${title}`;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    } catch {
+      // Storage full or blocked - fail silently in dev.
     }
-
-    return `Complete milestone ${order} for ${title}`;
   }
 
-  private getStepDescription(order: number, stepCount: number, input: CommitmentTaskInput): string {
-    if (order === 1) {
-      return `Turn the task description into a concrete checklist and identify the first visible output for: ${input.description}`;
+  private generateId(): string {
+    if (this.isBrowser && typeof window.crypto?.randomUUID === 'function') {
+      return window.crypto.randomUUID();
     }
-
-    if (order === stepCount) {
-      return 'Review the finished work, fix obvious gaps, and prepare evidence that the commitment is complete.';
-    }
-
-    return `Work on a focused slice of the task using the ${input.workStyle} style, keeping the output small enough to finish within this step.`;
-  }
-
-  private getExpectedOutput(order: number, stepCount: number, title: string): string {
-    if (order === 1) {
-      return 'A short checklist with a clear next action.';
-    }
-
-    if (order === stepCount) {
-      return `A final, reviewable version of "${title}" with completion evidence.`;
-    }
-
-    return 'A concrete intermediate deliverable that can be checked before moving on.';
+    return `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

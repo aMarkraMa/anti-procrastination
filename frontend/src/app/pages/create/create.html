@@ -110,8 +110,18 @@
       </label>
     </fieldset>
 
+    @if (error()) {
+      <div class="warning" role="alert">{{ error() }}</div>
+    }
+
     <div class="actions">
-      <button type="submit">Generate Commitment Plan</button>
+      <button type="submit" [disabled]="loading()">
+        @if (loading()) {
+          Generating commitment plan...
+        } @else {
+          Generate Commitment Plan
+        }
+      </button>
     </div>
   </form>
 </main>

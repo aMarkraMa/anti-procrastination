@@ -359,8 +359,57 @@ cd backend
 uv sync
 source .venv/bin/activate
 cp env.example .env
+echo 'OPENAI_API_KEY=sk-...' > .env.local   # secrets only, git-ignored
 alembic upgrade head
 uv run uvicorn app.main:app --reload
 ```
 
+`.env.local` is loaded **after** `.env` and overrides it. Put your API keys
+there so they never end up committed.
+
 OpenAPI is auto-generated at `http://localhost:8000/docs`.
+
+---
+
+## 12. Implemented endpoints
+
+### `POST /api/v1/plan/generate` — task decomposition (stateless)
+
+Mirrors the frontend `CommitmentTaskInput` shape; returns steps that match
+`CommitmentStep` so the Angular Review page can render them directly.
+
+Request:
+```json
+{
+  "title": "完成 React 项目首页",
+  "description": "...",
+  "durationValue": 90,
+  "durationUnit": "minutes",
+  "commitmentAmount": 30,
+  "difficultyLevel": "Medium",
+  "preferredStepCount": 4,
+  "workStyle": "Steady"
+}
+```
+
+Response (sums are guaranteed exact):
+```json
+{
+  "steps": [
+    {
+      "order": 1,
+      "title": "...",
+      "description": "...",
+      "expectedOutput": "...",
+      "timeLimitMinutes": 20,
+      "assignedCredit": 6
+    }
+  ],
+  "totalDurationMinutes": 90,
+  "totalCredit": 30,
+  "model": "gpt-4o-mini"
+}
+```
+
+Errors: `503 llm_unavailable` if `OPENAI_API_KEY` is missing or the upstream
+call fails.

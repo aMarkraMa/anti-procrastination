@@ -5,12 +5,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(".env", ".env.local"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     app_name: str = "anti-procrastination"
     app_env: str = "development"
     app_port: int = 8000
-    app_cors_origins: str = "http://localhost:5173"
+    app_cors_origins: str = "http://localhost:4200,http://localhost:5173"
 
     jwt_secret: str = "change-me"
     jwt_access_ttl_minutes: int = 30
@@ -22,6 +26,8 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     llm_model: str = "gpt-4o-mini"
     llm_max_steps: int = 8
+    llm_temperature: float = 0.4
+    llm_request_timeout_seconds: int = 60
 
     payment_provider: str = "mock"
     stripe_secret_key: str | None = None

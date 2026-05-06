@@ -1,43 +1,28 @@
-from fastapi import APIRouter
+"""Stateless plan-generation endpoint.
 
-router = APIRouter(prefix="/tasks/{task_id}/plan", tags=["plan"])
+The frontend currently keeps the draft task in local storage and just needs the
+LLM to break it into verifiable steps. We expose a single POST that takes the
+same shape the frontend already builds and returns the generated steps.
+"""
 
+from fastapi import APIRouter, HTTPException, status
 
-@router.post("/generate")
-async def generate_plan(task_id: str) -> dict:
-    raise NotImplementedError
+from app.schemas.plan import PlanRequest, PlanResponse
+from app.services.llm_service import LLMUnavailableError, generate_plan
 
-
-@router.post("/regenerate")
-async def regenerate_plan(task_id: str) -> dict:
-    raise NotImplementedError
-
-
-@router.post("/steps/{step_id}/regenerate")
-async def regenerate_step(task_id: str, step_id: str) -> dict:
-    raise NotImplementedError
+router = APIRouter(prefix="/plan", tags=["plan"])
 
 
-@router.patch("/steps/{step_id}")
-async def edit_step(task_id: str, step_id: str) -> dict:
-    raise NotImplementedError
-
-
-@router.delete("/steps/{step_id}", status_code=204)
-async def delete_step(task_id: str, step_id: str) -> None:
-    raise NotImplementedError
-
-
-@router.post("/reorder")
-async def reorder_steps(task_id: str) -> dict:
-    raise NotImplementedError
-
-
-@router.post("/reset")
-async def reset_plan(task_id: str) -> dict:
-    raise NotImplementedError
-
-
-@router.post("/confirm")
-async def confirm_plan(task_id: str) -> dict:
-    raise NotImplementedError
+@router.post(
+    "/generate",
+    response_model=PlanResponse,
+    response_model_by_alias=True,
+)
+async def generate(payload: PlanRequest) -> PlanResponse:
+    try:
+        return await generate_plan(payload)
+    except LLMUnavailableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "llm_unavailable", "message": str(exc)},
+        ) from exc
