@@ -78,3 +78,7 @@ build/
 .vscode/
 
 .DS_Store
+
+# Python package metadata
+*.egg-info/
+backend/*.egg-info/
