@@ -1,0 +1,109 @@
+<main class="create-page">
+  <header class="page-header">
+    <a class="back-link" routerLink="/">Back</a>
+    <p class="eyebrow">Commitment setup</p>
+    <h1>Create a concrete task</h1>
+    <p>
+      Give the system enough detail to generate small, verifiable steps with a real time box and
+      credit risk.
+    </p>
+  </header>
+
+  <form class="task-form" [formGroup]="form" (ngSubmit)="submit()">
+    <label class="field">
+      <span>Task Title</span>
+      <input type="text" formControlName="title" placeholder="完成 React 项目首页" />
+      @if (fieldInvalid('title')) {
+        <small>请输入 4 到 80 个字符的任务标题。</small>
+      }
+    </label>
+
+    <label class="field">
+      <span>Task Description</span>
+      <textarea
+        formControlName="description"
+        rows="5"
+        placeholder="描述你要完成什么、交付物是什么、怎样判断完成。"
+      ></textarea>
+      @if (fieldInvalid('description')) {
+        <small>请至少写 20 个字符，任务需要具体到可以判断完成。</small>
+      }
+    </label>
+
+    @if (isAbstractTask) {
+      <div class="warning" role="alert">
+        这个任务太抽象了。请改成一个可以在某个时间点判断是否完成的任务，例如“今晚完成简历第一页修改”或“在 2 小时内完成 3 道 LeetCode 题”。
+      </div>
+    }
+
+    <div class="grid">
+      <label class="field">
+        <span>Final Deadline</span>
+        <input type="datetime-local" formControlName="finalDeadline" />
+        @if ((fieldInvalid('finalDeadline') || submitted) && deadlineError) {
+          <small>{{ deadlineError }}</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Commitment Amount</span>
+        <div class="money-input">
+          <input type="number" min="1" step="1" formControlName="commitmentAmount" />
+          <span>€</span>
+        </div>
+        @if (fieldInvalid('commitmentAmount')) {
+          <small>请输入大于 0 的承诺金额。</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Difficulty Level</span>
+        <select formControlName="difficultyLevel">
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Preferred Step Count</span>
+        <input type="number" min="3" max="8" step="1" formControlName="preferredStepCount" />
+        @if (fieldInvalid('preferredStepCount')) {
+          <small>步骤数量需要在 3 到 8 步之间。</small>
+        }
+      </label>
+    </div>
+
+    <fieldset class="style-options">
+      <legend>Work Style</legend>
+
+      <label>
+        <input type="radio" value="Fast" formControlName="workStyle" />
+        <span>
+          <strong>Fast</strong>
+          快速完成，步骤更短
+        </span>
+      </label>
+
+      <label>
+        <input type="radio" value="Steady" formControlName="workStyle" />
+        <span>
+          <strong>Steady</strong>
+          稳定推进，节奏均衡
+        </span>
+      </label>
+
+      <label>
+        <input type="radio" value="HighQuality" formControlName="workStyle" />
+        <span>
+          <strong>High Quality</strong>
+          更重视检查和质量
+        </span>
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">Generate Commitment Plan</button>
+    </div>
+  </form>
+</main>
