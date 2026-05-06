@@ -9,6 +9,7 @@
       <div class="summary">
         <span>Total commitment: {{ draft.commitmentAmount | currency: 'EUR' }}</span>
         <span>Assigned total: {{ assignedTotal() | currency: 'EUR' }}</span>
+        <span>Duration: {{ draft.durationValue }} {{ draft.durationUnit }}</span>
         <span>{{ draft.steps.length }} steps</span>
       </div>
     </header>

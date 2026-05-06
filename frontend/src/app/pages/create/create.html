@@ -38,10 +38,18 @@
 
     <div class="grid">
       <label class="field">
-        <span>Final Deadline</span>
-        <input type="datetime-local" formControlName="finalDeadline" />
-        @if ((fieldInvalid('finalDeadline') || submitted) && deadlineError) {
-          <small>{{ deadlineError }}</small>
+        <span>Duration</span>
+        <div class="duration-input">
+          <input type="number" min="1" step="1" formControlName="durationValue" />
+          <select formControlName="durationUnit" aria-label="Duration unit">
+            <option value="seconds">Seconds</option>
+            <option value="minutes">Minutes</option>
+            <option value="hours">Hours</option>
+            <option value="days">Days</option>
+          </select>
+        </div>
+        @if ((fieldInvalid('durationValue') || submitted) && durationError) {
+          <small>{{ durationError }}</small>
         }
       </label>
 

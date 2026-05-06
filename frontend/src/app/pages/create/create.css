@@ -116,6 +116,12 @@ small {
   position: relative;
 }
 
+.duration-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 138px;
+  gap: 10px;
+}
+
 .money-input input {
   padding-right: 36px;
 }
@@ -221,6 +227,10 @@ button:focus-visible {
 
   .grid,
   .style-options {
+    grid-template-columns: 1fr;
+  }
+
+  .duration-input {
     grid-template-columns: 1fr;
   }
 

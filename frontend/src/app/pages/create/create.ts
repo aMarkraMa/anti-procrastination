@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
-import { CommitmentTaskInput } from '../../models/commitment';
+import { CommitmentTaskInput, DurationUnit } from '../../models/commitment';
 import { CommitmentStorageService } from '../../services/commitment-storage';
 
 @Component({
@@ -22,7 +22,8 @@ export class CreateComponent {
   protected readonly form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(80)]],
     description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(800)]],
-    finalDeadline: ['', [Validators.required]],
+    durationValue: [30, [Validators.required, Validators.min(1)]],
+    durationUnit: ['minutes' as DurationUnit, [Validators.required]],
     commitmentAmount: [30, [Validators.required, Validators.min(1), Validators.max(10000)]],
     difficultyLevel: ['Medium' as CommitmentTaskInput['difficultyLevel'], [Validators.required]],
     preferredStepCount: [4, [Validators.required, Validators.min(3), Validators.max(8)]],
@@ -54,14 +55,14 @@ export class CreateComponent {
     return vaguePatterns.some((pattern) => text.includes(pattern)) && !hasSpecificSignal;
   }
 
-  protected get deadlineError(): string {
-    const value = this.form.controls.finalDeadline.value;
+  protected get durationError(): string {
+    const value = this.form.controls.durationValue.value;
 
-    if (!value) {
-      return '请选择最终截止时间。';
+    if (!Number.isFinite(value) || value < 1) {
+      return '请输入大于 0 的持续时间。';
     }
 
-    return new Date(value).getTime() <= Date.now() ? '最终截止时间必须晚于当前时间。' : '';
+    return '';
   }
 
   protected fieldInvalid(fieldName: keyof typeof this.form.controls): boolean {
@@ -73,15 +74,27 @@ export class CreateComponent {
     this.submitted = true;
     this.form.markAllAsTouched();
 
-    if (this.form.invalid || this.deadlineError || this.isAbstractTask) {
+    if (this.form.invalid || this.durationError || this.isAbstractTask) {
       return;
     }
 
+    const formValue = this.form.getRawValue();
     const task = this.storage.createDraft({
-      ...this.form.getRawValue(),
-      finalDeadline: new Date(this.form.controls.finalDeadline.value).toISOString(),
+      ...formValue,
+      finalDeadline: this.calculateDeadline(formValue.durationValue, formValue.durationUnit),
     });
 
     await this.router.navigate(['/review'], { queryParams: { taskId: task.id } });
+  }
+
+  private calculateDeadline(value: number, unit: DurationUnit): string {
+    const unitMs: Record<DurationUnit, number> = {
+      seconds: 1000,
+      minutes: 60 * 1000,
+      hours: 60 * 60 * 1000,
+      days: 24 * 60 * 60 * 1000,
+    };
+
+    return new Date(Date.now() + value * unitMs[unit]).toISOString();
   }
 }

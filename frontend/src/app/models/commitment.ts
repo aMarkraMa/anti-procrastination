@@ -2,10 +2,13 @@ export type DifficultyLevel = 'Easy' | 'Medium' | 'Hard';
 export type WorkStyle = 'Fast' | 'Steady' | 'HighQuality';
 export type CommitmentStatus = 'Draft' | 'Confirmed' | 'InProgress' | 'Completed' | 'Failed';
 export type StepStatus = 'Pending' | 'InProgress' | 'Completed' | 'Failed';
+export type DurationUnit = 'seconds' | 'minutes' | 'hours' | 'days';
 
 export interface CommitmentTaskInput {
   title: string;
   description: string;
+  durationValue: number;
+  durationUnit: DurationUnit;
   finalDeadline: string;
   commitmentAmount: number;
   difficultyLevel: DifficultyLevel;
