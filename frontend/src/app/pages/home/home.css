@@ -1,5 +1,5 @@
 .topbar {
-  height: 49px;
+  height: 64px;
   display: grid;
   place-items: center;
   background: #ffffff;
@@ -7,15 +7,16 @@
   border-bottom: 1px solid #d7d7e8;
 }
 
-.topbar h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1;
+.brand-logo {
+  display: block;
+  width: min(280px, 76vw);
+  height: auto;
+  max-height: 46px;
+  object-fit: contain;
 }
 
 .hero {
-  min-height: calc(100vh - 50px);
+  min-height: calc(100vh - 64px);
   display: grid;
   place-items: center;
   padding: 72px 24px 120px;
@@ -130,11 +131,17 @@
 }
 
 @media (max-width: 560px) {
-  .topbar h1 {
-    font-size: 21px;
+  .topbar {
+    height: 58px;
+  }
+
+  .brand-logo {
+    width: min(230px, 78vw);
+    max-height: 40px;
   }
 
   .hero {
+    min-height: calc(100vh - 58px);
     padding: 48px 18px 72px;
   }
 
